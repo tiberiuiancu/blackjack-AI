@@ -1,3 +1,5 @@
+from .utils import busted, blackjack
+import numpy as np
 
 
 class Player:
@@ -10,14 +12,13 @@ class Player:
 
     def reset_cards(self):
         self.cards = [[]]
-        self.bets = [self.__initial_bet()]
         self.current_hand = 0
 
     def __initial_bet(self):
         # will implement in children classes
         pass
 
-    def make_move(self, deck=None):
+    def make_move(self, **kwargs):
         # will implement in children classes
         pass
 
@@ -55,3 +56,25 @@ class Player:
                 valid_moves.append('split')
 
         return valid_moves
+
+    def busted(self):
+        return busted(self.cards[self.current_hand])
+
+    def has_blackjack(self):
+        return blackjack(self.cards[self.current_hand])
+
+
+class RandomPlayer(Player):
+    def __init__(self):
+        super().__init__()
+
+    def reset_cards(self):
+        super().reset_cards()
+        self.bets = [self.__initial_bet()]
+
+    def __initial_bet(self):
+        # always bet this number
+        return 100
+
+    def make_move(self, **kwargs):
+        return np.random.choice(self.get_valid_moves())
