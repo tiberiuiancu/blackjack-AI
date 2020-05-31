@@ -1,14 +1,13 @@
 from blackjack.game import Game
-from blackjack.player import RandomPlayer
+from blackjack.player import *
+import numpy as np
+
+np.random.seed(0)
 
 if __name__ == '__main__':
     game = Game(
-        (RandomPlayer(),
-         RandomPlayer(),
-         RandomPlayer(),
-         RandomPlayer())
+        (HumanPlayer('P1'),
+         HumanPlayer('P2'))
     )
 
-    # simulate 1000 games
-    for _ in range(1000):
-        game.start_round()
+    game.start_round()

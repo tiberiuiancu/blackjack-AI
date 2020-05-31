@@ -23,7 +23,7 @@ def get_hand_value(cards):
 
 
 def busted(cards):
-    return get_hand_value(cards) == 21
+    return get_hand_value(cards) > 21
 
 
 def blackjack(cards):
@@ -31,3 +31,22 @@ def blackjack(cards):
         return False
 
     return get_hand_value(cards) == 21
+
+
+def cards_to_str(cards):
+    res = ''
+    for card in cards:
+        if card == 0:
+            res += 'A'
+        elif 1 <= card <= 9:
+            res += str(card + 1)
+        elif card == 10:
+            res += 'J'
+        elif card == 11:
+            res += 'Q'
+        else:
+            res += 'K'
+
+        res += ' '
+
+    return res

@@ -3,20 +3,17 @@ import numpy as np
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, name):
         # list of lists, each representing a hand a player has
         # a player will have more than one set of cards when splitting
         self.cards = []
         self.current_hand = 0
         self.bets = []
+        self.name = name
 
     def reset_cards(self):
         self.cards = [[]]
         self.current_hand = 0
-
-    def __initial_bet(self):
-        # will implement in children classes
-        pass
 
     def make_move(self, **kwargs):
         # will implement in children classes
@@ -65,16 +62,29 @@ class Player:
 
 
 class RandomPlayer(Player):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name):
+        super().__init__(name)
 
     def reset_cards(self):
         super().reset_cards()
-        self.bets = [self.__initial_bet()]
-
-    def __initial_bet(self):
-        # always bet this number
-        return 100
+        self.bets = [100]
 
     def make_move(self, **kwargs):
         return np.random.choice(self.get_valid_moves())
+
+
+class HumanPlayer(Player):
+    def __int__(self, name):
+        super.__init__(name)
+
+    def reset_cards(self):
+        super().reset_cards()
+        self.bets = [float(input(self.name + ' AMOUNT TO BET: '))]
+
+    def make_move(self, **kwargs):
+        valid_moves = self.get_valid_moves()
+        move = ''
+        while move not in valid_moves:
+            move = input('MOVE: ')
+
+        return move
