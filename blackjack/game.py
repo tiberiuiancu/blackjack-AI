@@ -1,6 +1,6 @@
 from .deck import Deck
 from .dealer import RandomDealer
-from .utils import busted, blackjack, get_hand_value, cards_to_str
+from .utils import busted, blackjack, cards_to_str, compare_card_values
 from copy import deepcopy as cp
 
 N_DECKS = 5
@@ -70,11 +70,22 @@ class Game:
                         player.current_hand += 1
 
         # now we have to make the move for the dealer
+        if self.verbose:
+            print('\nDEALER\'S TURN: ' + cards_to_str(self.dealer.cards))
+
         last_dealer_move = ''
         while last_dealer_move != 'stand' and not self.dealer.busted():
-            last_dealer_move = self.dealer.make_move(self.players)
+            last_dealer_move = self.dealer.make_move(players=self.players, deck=cp(self.deck))
+            if self.verbose:
+                print('MOVE: ' + last_dealer_move)
             if last_dealer_move == 'hit':
-                self.dealer.give_card(self.deck.draw_card())
+                card_to_give = self.deck.draw_card()
+                self.dealer.give_card(card_to_give)
+
+                if self.verbose:
+                    print('HIT ' + cards_to_str((card_to_give,)))
+            else:
+                print('STAND')
 
         # end of game; compute outcome
         player_rewards = []
@@ -82,19 +93,28 @@ class Game:
         for player in self.players:
             player_reward = 0
             for cards, bet in zip(player.cards, player.bets):
-                if busted(cards) or get_hand_value(cards) < get_hand_value(self.dealer.cards):
-                    # if busted or lost, you lose your bet, but the dealer gets your bet
+                comparison_value = compare_card_values(cards, self.dealer.cards)
+                if busted(cards):
+                    # if player busted
                     player_reward -= bet
                     dealer_reward += bet
+                elif busted(self.dealer.cards):
+                    # if dealer busted
+                    player_reward += bet
+                    dealer_reward -= bet
                 elif blackjack(cards) and not blackjack(self.dealer.cards):
                     # if blackjack, you get 1.5 * bet
                     player_reward += 1.5 * bet
                     dealer_reward -= 1.5 * bet
-                elif get_hand_value(cards) > get_hand_value(self.dealer.cards):
+                elif comparison_value > 0:
                     # if you have value higher than dealer, you get your bet back and 1 * bet more
                     player_reward += bet
                     dealer_reward -= bet
-                elif get_hand_value(cards) == get_hand_value(self.dealer.cards):
+                elif comparison_value < 0:
+                    # if you have value lower than dealer, you lose your bet
+                    player_reward -= bet
+                    dealer_reward += bet
+                elif comparison_value == 0:
                     # if it's a tie, nothing happens
                     pass
 

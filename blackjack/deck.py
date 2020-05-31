@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy as cp
 
 
 class Deck:
@@ -10,13 +11,20 @@ class Deck:
 
     def draw_card(self, card=None):
         if card is not None:
-            if self.cards[card] > 0:
-                self.cards[card] -= 1
+            new_deck = cp(self)
+            if new_deck.cards[card] > 0:
+                new_deck.cards[card] -= 1
+                return new_deck
+            else:
+                return None
         else:
             # get probability of each card
-            total = sum(self.cards)
-            probs = [card/total for card in self.cards]
+            probs = self.get_prob()
             return np.random.choice([i for i in range(13)], p=probs)
 
     def reset(self):
         self.cards = [self.n_decks * 4 for _ in range(13)]
+
+    def get_prob(self):
+        s = sum(self.cards)
+        return [freq/s for freq in self.cards]
