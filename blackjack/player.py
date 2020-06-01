@@ -144,3 +144,55 @@ class TablePlayer(Player):
 
                 # A 7 | A 8 | A 9
                 return 'stand'
+
+            if cards[0] == cards[1]:
+                # 2 2 | 3 3
+                if cards[0] == 1 or cards[0] == 2:
+                    if 3 <= dealer_card <= 6:
+                        return 'split'
+                    else:
+                        return 'hit'
+
+                # 4 4
+                if cards[0] == 3:
+                    return 'hit'
+
+                # 5 5
+                if cards[0] == 4:
+                    if 1 <= dealer_card <= 8 and 'double' in valid_moves:
+                        return 'double'
+                    else:
+                        return 'hit'
+
+                # 6 6
+                if cards[0] == 5:
+                    if 2 <= dealer_card <= 5:
+                        return 'split'
+                    else:
+                        return 'hit'
+
+                # 7 7
+                if cards[0] == 6:
+                    if 1 <= dealer_card <= 6:
+                        return 'split'
+                    else:
+                        return 'hit'
+
+                # 8 8
+                if cards[0] == 7:
+                    return 'split'
+
+                # 9 9
+                if cards[0] == 8:
+                    if 1 <= dealer_card <= 5 or 7 <= dealer_card <= 8:
+                        return 'split'
+                    else:
+                        return 'stand'
+
+                # 10 10
+                if cards[0] == 9:
+                    return 'stand'
+
+                # A A
+                if cards[0] == 0:
+                    return 'split'
