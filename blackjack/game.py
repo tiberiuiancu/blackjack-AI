@@ -1,5 +1,6 @@
 from .deck import Deck
 from .dealer import RandomDealer
+from .stats import Collector
 from .utils import busted, blackjack, cards_to_str, compare_card_values
 from copy import deepcopy as cp
 
@@ -19,6 +20,7 @@ class Game:
         self.add_players(players)
         self.phase = PLAYERS_TURN
         self.verbose = verbose
+        self.collector = Collector()
 
     def add_players(self, players):
         for player in players:
@@ -84,7 +86,7 @@ class Game:
 
                 if self.verbose:
                     print('HIT ' + cards_to_str((card_to_give,)))
-            else:
+            elif self.verbose:
                 print('STAND')
 
         # end of game; compute outcome
@@ -94,6 +96,10 @@ class Game:
             player_reward = 0
             for cards, bet in zip(player.cards, player.bets):
                 comparison_value = compare_card_values(cards, self.dealer.cards)
+                if not cards:
+                    # if player surrendered
+                    player_reward -= bet / 2
+                    dealer_reward += bet / 2
                 if busted(cards):
                     # if player busted
                     player_reward -= bet
@@ -118,15 +124,25 @@ class Game:
                     # if it's a tie, nothing happens
                     pass
 
+            # collect stats
+            self.collector.add_reward(player.name, player_reward)
+
             player_rewards.append(player_reward)
 
-        for reward in player_rewards:
-            print(reward)
+        if self.verbose:
+            for reward, player in zip(player_rewards, self.players):
+                print(player.name + ':', reward)
 
-        print('DEALER: ', dealer_reward)
+        # collect stats
+        self.collector.add_reward('dealer', dealer_reward)
+
+        if self.verbose:
+            print('DEALER: ', dealer_reward)
 
     def do_move(self, player, move):
         move = move.lower()
+        # add move to stats
+        self.collector.add_move(player.name, player.cards[player.current_hand], move)
         if move == 'hit':
             card_to_give = self.deck.draw_card()
             player.give_card(card_to_give)
@@ -152,7 +168,7 @@ class Game:
             player.give_card(card_to_give)
 
             if self.verbose:
-                print('DOUBLE ' + cards_to_str((card_to_give)))
+                print('DOUBLE ' + cards_to_str((card_to_give,)))
                 if player.busted():
                     print('BUSTED')
 
@@ -165,4 +181,6 @@ class Game:
                 print('SPLIT ' +
                       cards_to_str(player.cards[player.current_hand]) + '| ' +
                       cards_to_str(player.cards[player.current_hand + 1]))
-
+        elif move == 'surrender':
+            # we will clear the cards so we know later that the player surrendered
+            player.cards = [[]]
