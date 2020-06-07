@@ -2,6 +2,7 @@ from .deck import Deck
 from .dealer import RandomDealer
 from .stats import Collector
 from .utils import busted, blackjack, cards_to_str, compare_card_values
+from .player import QPlayer
 from copy import deepcopy as cp
 
 N_DECKS = 5
@@ -66,7 +67,7 @@ class Game:
                             print('\nPLAYER ' + player.name + ' to move')
                             print('CARDS: ' + cards_to_str(player.cards[player.current_hand]))
                             print('VALID MOVES: ' + ', '.join(player.get_valid_moves()))
-                        self.do_move(player, player.make_move(deck=cp(self.deck)))
+                        self.do_move(player, player.make_move(deck=cp(self.deck), dealer_card=self.dealer.cards[1]))
                     else:
                         # move to the next hand
                         player.current_hand += 1
@@ -127,7 +128,12 @@ class Game:
             # collect stats
             self.collector.add_reward(player.name, player_reward)
 
+            # collect info for verbose
             player_rewards.append(player_reward)
+
+            # update the qvalues if necessary
+            if type(player) == QPlayer and player.training:
+                player.update_q(player_reward)
 
         if self.verbose:
             for reward, player in zip(player_rewards, self.players):
