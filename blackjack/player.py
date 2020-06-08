@@ -91,126 +91,6 @@ class HumanPlayer(Player):
         return move
 
 
-# class TablePlayer(Player):
-#     # talbe from https://www.quora.com/Is-there-a-difference-between-the-game-of-Blackjack-and-21
-#     def __int__(self, name):
-#         super().__init__(name)
-#
-#     def reset_cards(self):
-#         super().reset_cards()
-#         self.bets = [100]
-#
-#     def make_move(self, **kwargs):
-#         dealer_card = kwargs['dealer_card']
-#
-#         cards = self.cards[self.current_hand]
-#         valid_moves = self.get_valid_moves()
-#
-#         # implement edge cases:
-#         if len(cards) == 2:
-#             # case where player has ACE
-#             if has_ace(cards):
-#                 # A 2 | A 3
-#                 if 1 in cards or 2 in cards:
-#                     if (4 <= dealer_card <= 5) and 'double' in valid_moves:
-#                         return 'double'
-#                     return 'hit'
-#
-#                 # A 4 | A 5
-#                 if 3 in cards or 4 in cards:
-#                     if (3 <= dealer_card <= 5) and \
-#                             'double' in valid_moves:
-#                         return 'double'
-#                     return 'hit'
-#
-#                 # A 6
-#                 if 5 in cards:
-#                     if 3 <= dealer_card <= 6 and 'double' in valid_moves:
-#                         return 'double'
-#                     else:
-#                         return 'hit'
-#
-#                 # A 7
-#                 if 6 in cards:
-#                     if 3 <= dealer_card <= 6:
-#                         if 'double' in valid_moves:
-#                             return 'double'
-#                         else:
-#                             return 'hit'
-#                     elif dealer_card == 1 or 6 <= dealer_card <= 7:
-#                         return 'stand'
-#                     else:
-#                         return 'hit'
-#
-#                 # A 7 | A 8 | A 9
-#                 return 'stand'
-#
-#             if cards[0] == cards[1]:
-#                 # 2 2 | 3 3
-#                 if cards[0] == 1 or cards[0] == 2:
-#                     if 3 <= dealer_card <= 6:
-#                         return 'split'
-#                     else:
-#                         return 'hit'
-#
-#                 # 4 4
-#                 if cards[0] == 3:
-#                     return 'hit'
-#
-#                 # 5 5
-#                 if cards[0] == 4:
-#                     if 1 <= dealer_card <= 8 and 'double' in valid_moves:
-#                         return 'double'
-#                     else:
-#                         return 'hit'
-#
-#                 # 6 6
-#                 if cards[0] == 5:
-#                     if 2 <= dealer_card <= 5:
-#                         return 'split'
-#                     else:
-#                         return 'hit'
-#
-#                 # 7 7
-#                 if cards[0] == 6:
-#                     if 1 <= dealer_card <= 6:
-#                         return 'split'
-#                     else:
-#                         return 'hit'
-#
-#                 # 8 8
-#                 if cards[0] == 7:
-#                     return 'split'
-#
-#                 # 9 9
-#                 if cards[0] == 8:
-#                     if 1 <= dealer_card <= 5 or 7 <= dealer_card <= 8:
-#                         return 'split'
-#                     else:
-#                         return 'stand'
-#
-#                 # 10 10
-#                 if cards[0] == 9:
-#                     return 'stand'
-#
-#                 # A A
-#                 if cards[0] == 0:
-#                     return 'split'
-#
-#         card_value = get_hand_value(cards)
-#
-#         # case where you have a big sum
-#         if card_value >= 17:
-#             return 'stand'
-#
-#         ace = has_ace(cards)
-#         if ace and 21 >= card_value + 10 >= 17:
-#             return 'stand'
-#
-#         if not ace and card_value <= 8:
-#             return 'hit'
-
-
 class QPlayer(Player):
     def __init__(self, name, training=True):
         super().__init__(name)
@@ -273,7 +153,6 @@ class QPlayer(Player):
     def update_q(self, reward):
         for state in self.made_moves:
             qvalue, n = self.qvalues[state]
-            print(n)
 
             # qvalue is the average of n_played values
             # to make it the average of n + 1 values, we have to multiply by n / (n + 1)
