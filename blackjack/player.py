@@ -94,9 +94,12 @@ class HumanPlayer(Player):
 class QPlayer(Player):
     def __init__(self, name, training=True):
         super().__init__(name)
-        # maps (value, has_ace, dealer_card, move) to an array [qvalue, n_performed]
+        # maps (value, has_ace, dealer_card) to an array [qvalue, n_performed]
         # where n_performed is the number of times the state has occured
         self.qvalues = {}
+
+        # cache for performing the recursive values estimation; same as dealer
+        self.move_cache = {}
 
         # set to true once we don't want to update qtable anymore
         self.training = training
@@ -111,44 +114,87 @@ class QPlayer(Player):
         for value in range(2, 23):
             for ace in [True, False]:
                 for dealer_card in range(13):
-                    for move in ['hit', 'stand', 'double', 'split', 'surrender']:
-                        self.qvalues[(value, ace, dealer_card, move)] = (0, 0)
+                    self.qvalues[(value, ace, dealer_card)] = (0, 0)
 
     def reset_cards(self):
         super().reset_cards()
         self.bets = [1]
         self.made_moves = set()
 
-    def get_best_move(self, dealer_card):
-        max_score = -1000
+    def get_best_move(self, deck, dealer_card):
+        max_ev = -1000
         move_to_make = ''
 
-        hand_value = get_hand_value(self.cards[self.current_hand])
-        ace = has_ace(self.cards[self.current_hand])
+        cards = self.cards[self.current_hand]
         for move in self.get_valid_moves():
-            state = self.qvalues[(hand_value, ace, dealer_card, move)]
-            if state[0] > max_score:
-                max_score = state[0]
+            # get the expected value of making that move in this state
+            ev = self.get_expected_value(cards, deck, dealer_card, move)
+            if ev > max_ev:
+                max_ev = ev
                 move_to_make = move
 
         return move_to_make
 
+    def get_expected_value(self, cards, deck, dealer_card, move):
+        hand_value = get_hand_value(cards)
+        ace = has_ace(cards)
+
+        if hand_value > 21:
+            return -1
+
+        if move == 'stand':
+            return self.qvalues[(hand_value, ace, dealer_card)][0]
+        elif move == 'hit':
+            if (hand_value, ace) in self.move_cache:
+                return self.move_cache[(hand_value, ace)]
+
+            ev = 0
+            probs = deck.get_prob()
+            for p, card in zip(probs, range(13)):
+                if p > 0:
+                    ev += p * max(
+                        self.get_expected_value(cards + [card], deck.draw_card(card), dealer_card, 'stand'),
+                        self.get_expected_value(cards + [card], deck.draw_card(card), dealer_card, 'hit'),
+                        self.get_expected_value(cards + [card], deck.draw_card(card), dealer_card, 'split')
+                    )
+
+            self.move_cache[(hand_value, ace)] = ev
+            return ev
+        elif move == 'double':
+            ev = 0
+            probs = deck.get_prob()
+            for p, card in zip(probs, range(13)):
+                if p > 0:
+                    ev += p * self.get_expected_value(cards + [card], deck.draw_card(card), dealer_card, 'stand')
+            return ev
+        elif move == 'split':
+            # because in the 'hit' case we split without checking if it is possible, we check here
+            if len(cards) != 2 or cards[0] != cards[1]:
+                return -1000
+            return 2 * self.get_expected_value(cards[:-1], deck, dealer_card, 'hit')
+        elif move == 'surrender':
+            return 0.5
+
     def make_move(self, **kwargs):
         dealer_card = kwargs['dealer_card']
+        deck = kwargs['deck']
+        cards = self.cards[self.current_hand]
+
+        # reset move cache
+        self.move_cache = {}
 
         if self.training:
             # pick random move with prob eps
             if np.random.rand() < self.eps:
                 move = np.random.choice(self.get_valid_moves())
             else:
-                move = self.get_best_move(dealer_card)
+                move = self.get_best_move(deck, dealer_card)
 
-            state = (get_hand_value(self.cards[self.current_hand]),
-                     has_ace(self.cards[self.current_hand]), dealer_card, move)
+            state = (get_hand_value(cards), has_ace(cards), dealer_card)
             self.made_moves.add(state)
             return move
         else:
-            return self.get_best_move(dealer_card)
+            return self.get_best_move(deck, dealer_card)
 
     def update_q(self, reward):
         for state in self.made_moves:

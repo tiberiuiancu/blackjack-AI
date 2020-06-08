@@ -7,8 +7,8 @@ import time
 
 np.random.seed(0)
 
-TRAINING_ROUNDS = 10 * 1000
-PRINT_EVERY = 200
+TRAINING_ROUNDS = 1 * 1000
+PRINT_EVERY = 100
 LOAD = True
 
 if __name__ == '__main__':

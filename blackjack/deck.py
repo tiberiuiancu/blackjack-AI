@@ -18,9 +18,14 @@ class Deck:
             else:
                 return None
         else:
-            # get probability of each card
-            probs = self.get_prob()
-            return np.random.choice([i for i in range(13)], p=probs)
+            if sum(self.cards) <= 0:
+                self.reset()
+            return np.random.choice([i for i in range(13)], p=self.get_prob())
+
+    def add_card(self, card):
+        new_deck = cp(self)
+        new_deck.cards[card] += 1
+        return new_deck
 
     def reset(self):
         self.cards = [self.n_decks * 4 for _ in range(13)]

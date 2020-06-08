@@ -67,7 +67,10 @@ class Game:
                             print('\nPLAYER ' + player.name + ' to move')
                             print('CARDS: ' + cards_to_str(player.cards[player.current_hand]))
                             print('VALID MOVES: ' + ', '.join(player.get_valid_moves()))
-                        self.do_move(player, player.make_move(deck=cp(self.deck), dealer_card=self.dealer.cards[1]))
+
+                        # we give the player a deck with one of the dealer's cards added back in
+                        self.do_move(player, player.make_move(deck=self.deck.add_card(self.dealer.cards[0]),
+                                                              dealer_card=self.dealer.cards[1]))
                     else:
                         # move to the next hand
                         player.current_hand += 1
