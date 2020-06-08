@@ -7,9 +7,12 @@ import time
 
 np.random.seed(0)
 
-TRAINING_ROUNDS = 1 * 1000
+TRAINING_ROUNDS = 100 * 1000
 PRINT_EVERY = 100
-LOAD = True
+LOAD = False
+
+# controls the epsilon value
+learning_rate = 0.0001
 
 if __name__ == '__main__':
     players = [QPlayer(str(i)) for i in range(5)]
@@ -23,8 +26,11 @@ if __name__ == '__main__':
 
         start_time = time.time()
         for i in range(TRAINING_ROUNDS):
+            for player in players:
+                player.eps *= (1 + learning_rate)
+
             if i % PRINT_EVERY == PRINT_EVERY - 1:
-                remaining = int((time.time() - start_time) * TRAINING_ROUNDS / i)
+                remaining = int((time.time() - start_time) / i * (TRAINING_ROUNDS - i))
                 print('ETA:', '%02d:%02d:%02d' % (remaining // 3600,
                                                   (remaining % 3600) // 60,
                                                   remaining % 3600 % 60))

@@ -193,3 +193,6 @@ class Game:
         elif move == 'surrender':
             # we will clear the cards so we know later that the player surrendered
             player.cards = [[]]
+
+            if self.verbose:
+                print('SURRENDER')

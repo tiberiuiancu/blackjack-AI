@@ -108,7 +108,7 @@ class QPlayer(Player):
         self.made_moves = set()
 
         # epsilon is the random selection value
-        self.eps = 0.5
+        self.eps = 1
 
         # init qvalues
         for value in range(2, 23):
@@ -173,7 +173,7 @@ class QPlayer(Player):
                 return -1000
             return 2 * self.get_expected_value(cards[:-1], deck, dealer_card, 'hit')
         elif move == 'surrender':
-            return 0.5
+            return -0.5
 
     def make_move(self, **kwargs):
         dealer_card = kwargs['dealer_card']
@@ -206,5 +206,5 @@ class QPlayer(Player):
             qvalue *= n / (n + 1)
             qvalue += reward / (n + 1)
 
-            # updaate qvalues
+            # update qvalues
             self.qvalues[state] = (qvalue, n + 1)
