@@ -110,6 +110,9 @@ class QPlayer(Player):
         # epsilon is the random selection value
         self.eps = 1
 
+        # controls how much new values contribute to the final res
+        self.gamma = 0.95
+
         # init qvalues
         for value in range(2, 23):
             for ace in [True, False]:
@@ -209,8 +212,12 @@ class QPlayer(Player):
             # qvalue is the average of n_played values
             # to make it the average of n + 1 values, we have to multiply by n / (n + 1)
             # and then add the reward * (n + 1)
-            qvalue *= n / (n + 1)
-            qvalue += reward / (n + 1)
+            # qvalue *= n / (n + 1)
+            # qvalue += reward / (n + 1)
+
+            # update using qvalue instead of the above average
+            # this immitates "forgetting"
+            qvalue = qvalue * self.gamma + (1 - self.gamma) * reward
 
             # update qvalues
             self.qvalues[state] = (qvalue, n + 1)

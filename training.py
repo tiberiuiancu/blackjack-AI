@@ -9,7 +9,7 @@ np.random.seed(0)
 
 TRAINING_ROUNDS = 100 * 1000
 PRINT_EVERY = 100
-LOAD = True
+LOAD = False
 
 # controls the epsilon value
 learning_rate = 0.0001
