@@ -121,6 +121,12 @@ class QPlayer(Player):
         self.bets = [1]
         self.made_moves = set()
 
+    def get_valid_moves(self):
+        moves = super().get_valid_moves()
+        if self.training and 'surrender' in moves:
+            moves.remove('surrender')
+        return moves
+
     def get_best_move(self, deck, dealer_card):
         max_ev = -1000
         move_to_make = ''

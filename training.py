@@ -9,7 +9,7 @@ np.random.seed(0)
 
 TRAINING_ROUNDS = 100 * 1000
 PRINT_EVERY = 100
-LOAD = False
+LOAD = True
 
 # controls the epsilon value
 learning_rate = 0.0001
@@ -55,4 +55,5 @@ if __name__ == '__main__':
         verbose=True
     )
 
+    print(players[0].qvalues[(18, False, 10)])
     game.start_round()
