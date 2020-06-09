@@ -44,7 +44,7 @@ def validate(players, n_games):
     return player_reward, dealer_reward
 
 
-TRAINING_ROUNDS = 1 * 5000 * 1000
+TRAINING_ROUNDS = 1 * 500 * 1000
 VALIDATION_ROUNDS = 100
 PRINT_EVERY = 100
 SAVE_EVERY = 1000
