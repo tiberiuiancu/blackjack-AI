@@ -1,7 +1,7 @@
 from .deck import Deck
 from .dealer import RandomDealer
 from .stats import Collector
-from .utils import busted, blackjack, cards_to_str, compare_card_values
+from .utils import *
 from .player import QPlayer
 from copy import deepcopy as cp
 
@@ -37,12 +37,16 @@ class Game:
         # for each player, reset their hands and deal them new cards
         for player in self.players:
             player.reset_cards()
-            card1, card2 = self.deck.draw_card(), self.deck.draw_card()
-            player.give_card(card1)
-            player.give_card(card2)
+            if type(player) == QPlayer and player.training:
+                # give the player some random cards during training
+                player.cards = [get_random_cards()]
+            else:
+                card1, card2 = self.deck.draw_card(), self.deck.draw_card()
+                player.give_card(card1)
+                player.give_card(card2)
 
             if self.verbose:
-                print('PLAYER ' + player.name + ' cards:', cards_to_str((card1, card2)))
+                print('PLAYER ' + player.name + ' cards:', cards_to_str(player.cards[0]))
 
         # do the same for the dealer
         self.dealer.reset_cards()
@@ -175,6 +179,11 @@ class Game:
             player.bets[player.current_hand] *= 2
             card_to_give = self.deck.draw_card()
             player.give_card(card_to_give)
+
+            # add doubling to the training set
+            if type(player) == QPlayer and player.training and not player.busted():
+                cards = player.cards[player.current_hand]
+                player.made_moves = (get_hand_value(cards), has_ace(cards), self.dealer.cards[1])
 
             if self.verbose:
                 print('DOUBLE ' + cards_to_str((card_to_give,)))

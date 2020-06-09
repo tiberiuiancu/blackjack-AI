@@ -105,7 +105,7 @@ class QPlayer(Player):
         self.training = training
 
         # a variables which holds the moves made each turn; used to update the qvalues
-        self.made_moves = set()
+        self.made_moves = None
 
         # epsilon is the random selection value
         self.eps = 1
@@ -117,13 +117,13 @@ class QPlayer(Player):
         for value in range(2, 23):
             for ace in [True, False]:
                 for dealer_card in range(13):
-                    init_val = np.clip(np.random.normal(0, 0.3), -1, 1)
+                    init_val = np.clip(np.random.normal(0, 0.1), -1, 1)
                     self.qvalues[(value, ace, dealer_card)] = (init_val, 0)
 
     def reset_cards(self):
         super().reset_cards()
         self.bets = [1]
-        self.made_moves = set()
+        self.made_moves = None
 
     def get_valid_moves(self):
         moves = super().get_valid_moves()
@@ -195,20 +195,15 @@ class QPlayer(Player):
         self.move_cache = {}
 
         if self.training:
-            # pick random move with prob eps
-            if np.random.rand() < self.eps:
-                move = np.random.choice(self.get_valid_moves())
-            else:
-                move = self.get_best_move(deck, dealer_card)
-
-            state = (get_hand_value(cards), has_ace(cards), dealer_card)
-            self.made_moves.add(state)
-            return move
+            # always stand because this is what we want to learn
+            self.made_moves = (get_hand_value(cards), has_ace(cards), dealer_card)
+            return 'stand'
         else:
             return self.get_best_move(deck, dealer_card)
 
     def update_q(self, reward):
-        for state in self.made_moves:
+        if self.made_moves is not None:
+            state = self.made_moves
             qvalue, n = self.qvalues[state]
 
             # qvalue is the average of n_played values

@@ -1,3 +1,5 @@
+import numpy as np
+
 # A = 0
 # 2 = 1
 # 3 = 2
@@ -73,3 +75,43 @@ def compare_card_values(cards1, cards2):
         cards2_value += 10
 
     return cards1_value - cards2_value
+
+
+def get_random_cards():
+    hand_value = np.random.randint(2, 22)
+    has_ace = bool(np.random.randint(0, 2))
+
+    if hand_value == 2 or hand_value == 2 and not has_ace:
+        return get_random_cards()
+
+    cards = []
+    if has_ace:
+        cards.append(0)
+        hand_value -= 1
+
+    # greedily give player some cards that amount to hand_value
+    while hand_value > 0:
+        # if the player doesn't have an ace, we must give them a 2 and an 9 to amount to 11
+        if hand_value == 11 and not has_ace:
+            cards.append(1)
+            cards.append(8)
+            break
+
+        # if the hand value is at least 10, give them player a 10 and continue
+        if hand_value > 10:
+            cards.append(9)
+            hand_value -= 10
+            continue
+
+        # if the hand value is less or eq to 10, give them the biggest card we can and exit
+        if len(cards):
+            cards.append(hand_value - 1)
+            break
+
+        # if the player has no cards currently, we split the remaining value in 2
+        card1 = hand_value // 2
+        card2 = hand_value - card1
+        cards.append(card1 - 1)
+        cards.append(card2 - 1)
+
+    return cards
