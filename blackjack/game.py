@@ -14,14 +14,14 @@ GAME_OVER = 2
 
 
 class Game:
-    def __init__(self, players=(), dealer_type=RandomDealer, verbose=True):
+    def __init__(self, players=(), dealer_type=RandomDealer, verbose=True, collect_stats=True):
         self.deck = Deck(N_DECKS)
         self.players = []
         self.dealer = dealer_type()
         self.add_players(players)
         self.phase = PLAYERS_TURN
         self.verbose = verbose
-        self.collector = Collector()
+        self.collector = Collector() if collect_stats else None
 
     def add_players(self, players):
         for player in players:
@@ -133,7 +133,8 @@ class Game:
                     pass
 
             # collect stats
-            self.collector.add_reward(player.name, player_reward)
+            if self.collector:
+                self.collector.add_reward(player.name, player_reward)
 
             # collect info for verbose
             player_rewards.append(player_reward)
@@ -147,7 +148,8 @@ class Game:
                 print(player.name + ':', reward)
 
         # collect stats
-        self.collector.add_reward('dealer', dealer_reward)
+        if self.collector:
+            self.collector.add_reward('dealer', dealer_reward)
 
         if self.verbose:
             print('DEALER: ', dealer_reward)
@@ -155,7 +157,8 @@ class Game:
     def do_move(self, player, move):
         move = move.lower()
         # add move to stats
-        self.collector.add_move(player.name, player.cards[player.current_hand], move)
+        if self.collector:
+            self.collector.add_move(player.name, player.cards[player.current_hand], move)
         if move == 'hit':
             card_to_give = self.deck.draw_card()
             player.give_card(card_to_give)
