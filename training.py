@@ -75,17 +75,18 @@ if __name__ == '__main__':
 
         # validate
         if i % VALIDATE_EVERY == VALIDATE_EVERY - 1:
-            print('VALIDATING')
+            print('VALIDATING...', end='', flush=True)
             stats.append(validate(players, VALIDATION_ROUNDS))
+            print('PLAYER:', stats[-1][0], 'DEALER:', stats[-1][1])
+
+            # also save stats
+            with open('validation.pickle', 'wb') as f:
+                pickle.dump(stats, f)
 
         # save
         if i % SAVE_EVERY == SAVE_EVERY - 1:
             print('SAVING')
             save_values(players)
-
-            # also save stats
-            with open('validation.pickle', 'wb') as f:
-                pickle.dump(stats, f)
 
         # print ETA
         if i % PRINT_EVERY == PRINT_EVERY - 1:
