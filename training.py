@@ -55,5 +55,4 @@ if __name__ == '__main__':
         verbose=True
     )
 
-    print(players[0].qvalues[(18, False, 10)])
-    game.start_round()
+    print(players[0].qvalues[(11, False, 10)])

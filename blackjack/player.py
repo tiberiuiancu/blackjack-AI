@@ -117,7 +117,8 @@ class QPlayer(Player):
         for value in range(2, 23):
             for ace in [True, False]:
                 for dealer_card in range(13):
-                    self.qvalues[(value, ace, dealer_card)] = (0, 0)
+                    init_val = np.clip(np.random.normal(0, 0.3), -1, 1)
+                    self.qvalues[(value, ace, dealer_card)] = (init_val, 0)
 
     def reset_cards(self):
         super().reset_cards()
@@ -126,6 +127,7 @@ class QPlayer(Player):
 
     def get_valid_moves(self):
         moves = super().get_valid_moves()
+        # remove surrender if we are training to avoid converging on surrender
         if self.training and 'surrender' in moves:
             moves.remove('surrender')
         return moves
@@ -216,7 +218,6 @@ class QPlayer(Player):
             # qvalue += reward / (n + 1)
 
             # update using qvalue instead of the above average
-            # this immitates "forgetting"
             qvalue = qvalue * self.gamma + (1 - self.gamma) * reward
 
             # update qvalues
