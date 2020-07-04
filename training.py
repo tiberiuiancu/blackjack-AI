@@ -2,8 +2,13 @@ from blackjack.game import Game
 from blackjack.player import *
 from blackjack.dealer import *
 import numpy as np
+import matplotlib.pyplot as plt
 import pickle
 import time
+
+
+def moving_average(x, w):
+    return np.convolve(x, np.ones(w), 'valid') / w
 
 
 def save_values(players):
@@ -44,20 +49,27 @@ def validate(players, n_games):
     return player_reward, dealer_reward
 
 
-TRAINING_ROUNDS = 1 * 500 * 1000
-VALIDATION_ROUNDS = 100
+LOAD = True
+TRAINING_ROUNDS = 0 * 500 * 1000
+VALIDATION_ROUNDS = 50
 PRINT_EVERY = 100
 SAVE_EVERY = 1000
-VALIDATE_EVERY = TRAINING_ROUNDS // 200
-LOAD = False
+VALIDATE_EVERY = TRAINING_ROUNDS // 100
+N_PLAYERS = 5
 
 if __name__ == '__main__':
-    players = [QPlayer(str(i)) for i in range(5)]
+    players = [QPlayer(str(i)) for i in range(N_PLAYERS)]
 
     if LOAD:
         for player in players:
             with open('savefile' + player.name + '.pickle', 'rb') as f:
                 player.qvalues = pickle.load(f)
+
+        try:
+            with open('validation.pickle', 'rb') as f:
+                validation = pickle.load(f)
+        except FileNotFoundError:
+            validation = []
 
     game = Game(
         players=players,
@@ -94,3 +106,34 @@ if __name__ == '__main__':
             print('ETA:', '%02d:%02d:%02d' % (remaining // 3600,
                                               (remaining % 3600) // 60,
                                               remaining % 3600 % 60))
+
+    for player in players:
+        player.training = False
+
+    game = Game(
+        players=players,
+        dealer_type=PerfectDealer,
+        verbose=False,
+        collect_stats=True
+    )
+
+    for i in range(100):
+        print(i)
+        game.start_round()
+
+    cumulative_rewards = {}
+    for i in range(N_PLAYERS):
+        name = str(i)
+        cumulative_rewards[name] = [0]
+        for j, reward in enumerate(game.collector.rewards[name]):
+            cumulative_rewards[name].append(cumulative_rewards[name][j] + reward)
+
+    name = 'dealer'
+    cumulative_rewards[name] = [0]
+    for j, reward in enumerate(game.collector.rewards[name]):
+        cumulative_rewards[name].append(cumulative_rewards[name][j] + reward)
+
+    for i in range(N_PLAYERS):
+        plt.plot(cumulative_rewards[str(i)])
+    plt.plot(cumulative_rewards['dealer'], label='dealer')
+    plt.show()

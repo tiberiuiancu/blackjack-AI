@@ -68,7 +68,7 @@ class RandomPlayer(Player):
 
     def reset_cards(self):
         super().reset_cards()
-        self.bets = [100]
+        self.bets = [1]
 
     def make_move(self, **kwargs):
         return np.random.choice(self.get_valid_moves())
