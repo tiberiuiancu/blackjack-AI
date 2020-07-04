@@ -12,10 +12,10 @@ def moving_average(x, w):
     return np.convolve(x, np.ones(w), 'valid') / w
 
 
-def save_values(players):
+def save_values(players, dir=''):
     # save to not lose progress
-    for i, player in enumerate(players):
-        with open('savefile' + str(i) + '.pickle', 'wb') as f:
+    for player in players:
+        with open(dir + player.name + '.pickle', 'wb') as f:
             pickle.dump(player.qvalues, f)
 
 
@@ -50,24 +50,27 @@ def validate(players, n_games):
     return player_reward, dealer_reward
 
 
-LOAD = True
+LOAD = False
 LOAD_DIR = 'models/5_players_500K/'
-TRAINING_ROUNDS = 0 * 500 * 1000
+
+TRAINING_ROUNDS = 1 * 1000 * 1000
+N_PLAYERS = 10
 VALIDATION_ROUNDS = 50
+SAVE_DIR = 'models/' + str(N_PLAYERS) + '_players_' + str(TRAINING_ROUNDS // 1000) + 'K/'
+
 PRINT_EVERY = 100
 SAVE_EVERY = 1000
-VALIDATE_EVERY = TRAINING_ROUNDS // 100
-N_PLAYERS = 5
+VALIDATE_EVERY = 0
 
 if __name__ == '__main__':
     players = [QPlayer(str(i)) for i in range(N_PLAYERS)]
 
     # make the directory to store the model in
-    os.makedirs('models/' + str(N_PLAYERS) + '_players_' + str(TRAINING_ROUNDS // 1000) + 'K', exist_ok=True)
+    os.makedirs(SAVE_DIR, exist_ok=True)
 
     if LOAD:
         for player in players:
-            with open(LOAD_DIR + 'savefile' + player.name + '.pickle', 'rb') as f:
+            with open(LOAD_DIR + player.name + '.pickle', 'rb') as f:
                 player.qvalues = pickle.load(f)
 
         try:
@@ -91,7 +94,7 @@ if __name__ == '__main__':
         game.start_round()
 
         # validate
-        if i % VALIDATE_EVERY == VALIDATE_EVERY - 1:
+        if VALIDATE_EVERY > 0 and i % VALIDATE_EVERY == VALIDATE_EVERY - 1:
             print('VALIDATING...', end='', flush=True)
             stats.append(validate(players, VALIDATION_ROUNDS))
             print('PLAYER:', stats[-1][0], 'DEALER:', stats[-1][1])
@@ -102,8 +105,8 @@ if __name__ == '__main__':
 
         # save
         if i % SAVE_EVERY == SAVE_EVERY - 1:
-            print('SAVING')
-            save_values(players)
+            print('SAVING --', i + 1)
+            save_values(players, SAVE_DIR)
 
         # print ETA
         if i % PRINT_EVERY == PRINT_EVERY - 1:
