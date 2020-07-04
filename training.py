@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import time
+import os
 
 
 def moving_average(x, w):
@@ -50,6 +51,7 @@ def validate(players, n_games):
 
 
 LOAD = True
+LOAD_DIR = 'models/5_players_500K/'
 TRAINING_ROUNDS = 0 * 500 * 1000
 VALIDATION_ROUNDS = 50
 PRINT_EVERY = 100
@@ -60,9 +62,12 @@ N_PLAYERS = 5
 if __name__ == '__main__':
     players = [QPlayer(str(i)) for i in range(N_PLAYERS)]
 
+    # make the directory to store the model in
+    os.makedirs('models/' + str(N_PLAYERS) + '_players_' + str(TRAINING_ROUNDS // 1000) + 'K', exist_ok=True)
+
     if LOAD:
         for player in players:
-            with open('savefile' + player.name + '.pickle', 'rb') as f:
+            with open(LOAD_DIR + 'savefile' + player.name + '.pickle', 'rb') as f:
                 player.qvalues = pickle.load(f)
 
         try:
