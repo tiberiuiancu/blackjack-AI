@@ -66,7 +66,8 @@ if __name__ == '__main__':
     players = [QPlayer(str(i)) for i in range(N_PLAYERS)]
 
     # make the directory to store the model in
-    os.makedirs(SAVE_DIR, exist_ok=True)
+    if TRAINING_ROUNDS:
+        os.makedirs(SAVE_DIR, exist_ok=True)
 
     if LOAD:
         for player in players:
