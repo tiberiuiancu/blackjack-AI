@@ -75,6 +75,8 @@ class PerfectDealer(Dealer):
         return EV
 
     def hit_expected_value(self, cards, deck, players):
+        state = tuple(sorted(cards))
+
         card_value, ace = get_hand_value(cards), has_ace(cards)
 
         # cap card_value to 22, so we don't get too many values in the cache
@@ -82,8 +84,8 @@ class PerfectDealer(Dealer):
             card_value = 22
 
         # if we already have this in the cache, then don't recompute
-        if (card_value, ace) in self.cache:
-            return self.cache[(card_value, ace)]
+        if state in self.cache:
+            return self.cache[state]
 
         # we will return the maximum between these 2 values
         EV_hit = 0
@@ -91,8 +93,8 @@ class PerfectDealer(Dealer):
 
         # if card value is bigger than 21, we can't hit anymore, so we return the stand EV
         if card_value > 21:
-            self.cache[(card_value, ace)] = EV_stand
-            return self.cache[(card_value, ace)]
+            self.cache[state] = EV_stand
+            return self.cache[state]
 
         # get probability of each card getting drawn
         probs = deck.get_prob()
@@ -100,10 +102,9 @@ class PerfectDealer(Dealer):
             if deck.cards[card] > 0:
                 EV_hit += prob * self.hit_expected_value(cp(cards) + [card], deck.draw_card(card), players)
 
-        # some garbage collection since we copy the objects each recursion
+        # some garbage collection since we copy the objects each recursion (??)
         del deck
         del cards
 
-        self.cache[(card_value, ace)] = max(EV_hit, EV_stand)
-        return self.cache[(card_value, ace)]
-
+        self.cache[state] = max(EV_hit, EV_stand)
+        return self.cache[state]

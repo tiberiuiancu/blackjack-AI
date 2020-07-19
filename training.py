@@ -50,11 +50,11 @@ def validate(players, n_games):
     return player_reward, dealer_reward
 
 
-LOAD = False
+LOAD = True
 LOAD_DIR = 'models/5_players_500K/'
 
-TRAINING_ROUNDS = 1 * 1000 * 1000
-N_PLAYERS = 10
+TRAINING_ROUNDS = 0 * 1000 * 1000
+N_PLAYERS = 5
 VALIDATION_ROUNDS = 50
 SAVE_DIR = 'models/' + str(N_PLAYERS) + '_players_' + str(TRAINING_ROUNDS // 1000) + 'K/'
 
