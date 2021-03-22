@@ -1,2 +1,2 @@
-# blackjack-AI
-Attempt at implementing a blackjack AI player.
+# Blackjack AI
+Implementation of the perfect blackjack AI dealer and Q-learning player.
